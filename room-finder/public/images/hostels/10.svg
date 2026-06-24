@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" role="img" aria-label="Hostel room">
+  <defs>
+    <linearGradient id="bg" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#a7f3d0"/>
+      <stop offset="100%" stop-color="#d1fae5"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  <rect x="65" y="72" width="470" height="246" rx="22" fill="#ffffff" opacity="0.94"/>
+  <rect x="105" y="112" width="390" height="28" rx="6" fill="#34d399"/>
+  <rect x="105" y="155" width="220" height="130" rx="12" fill="#10b981"/>
+  <rect x="345" y="155" width="150" height="130" rx="12" fill="#059669" opacity="0.85"/>
+  <text x="300" y="355" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" fill="#064e3b">Premium ensuite</text>
+</svg>

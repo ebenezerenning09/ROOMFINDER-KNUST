@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="RoomFinder">
+  <rect width="32" height="32" rx="8" fill="#ecfdf5"/>
+  <path d="M16 6 L6 14.5 V26 H13 V19 H19 V26 H26 V14.5 Z" fill="#059669"/>
+  <path d="M16 6 L26 14.5 H22 L16 9.5 L10 14.5 H6 Z" fill="#10b981"/>
+  <rect x="14" y="19" width="4" height="7" rx="0.5" fill="#047857"/>
+</svg>
