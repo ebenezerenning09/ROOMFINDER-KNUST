@@ -122,23 +122,33 @@ class RoomSeeder extends Seeder
                 'bedrooms' => 2,
                 'whatsapp' => '233551234511',
             ],
+            [
+                'title' => 'Homestay with family in Ayeduase',
+                'description' => 'Live with a welcoming host family in Ayeduase. Includes a private bedroom, shared kitchen access, home-cooked meals on request, and a safe, quiet environment ideal for students who prefer a family setting over a hostel.',
+                'price' => 3500.00,
+                'location' => 'Ayeduase',
+                'room_type' => 'homestay',
+                'bedrooms' => 1,
+                'whatsapp' => '233241234512',
+            ],
         ];
 
         foreach ($rooms as $index => $roomData) {
-            $primaryImage = Room::placeholderImageUrl(($index % 12) + 1);
+            $count = Room::PLACEHOLDER_IMAGE_COUNT;
+            $primaryImage = Room::placeholderImageUrl(($index % $count) + 1);
 
             $room = Room::query()->create([
                 ...$roomData,
                 'image' => $primaryImage,
+                'is_published' => true,
+                'is_verified' => true,
             ]);
 
-            $imageNumbers = [
-                ($index % 12) + 1,
-                (($index + 4) % 12) + 1,
-                (($index + 7) % 12) + 1,
-            ];
-
-            $imageNumbers = array_values(array_unique($imageNumbers));
+            $offsets = [0, 3, 6, 9, 11];
+            $imageNumbers = array_values(array_unique(array_map(
+                fn (int $offset) => (($index + $offset) % $count) + 1,
+                $offsets
+            )));
 
             foreach ($imageNumbers as $sortOrder => $imageNumber) {
                 RoomImage::query()->create([

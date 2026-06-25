@@ -22,6 +22,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@roomfinder.test',
+            'is_admin' => true,
+        ]);
+
         $this->call(RoomSeeder::class);
     }
 }

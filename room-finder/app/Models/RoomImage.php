@@ -16,6 +16,10 @@ class RoomImage extends Model
 
     public function url(): string
     {
+        if (str_starts_with($this->path, 'storage/')) {
+            return asset($this->path);
+        }
+
         if (str_starts_with($this->path, '/')) {
             return $this->path;
         }

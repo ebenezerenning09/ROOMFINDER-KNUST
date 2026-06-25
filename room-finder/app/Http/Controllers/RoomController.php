@@ -11,6 +11,7 @@ class RoomController extends Controller
     public function index(Request $request): View
     {
         $rooms = Room::query()
+            ->published()
             ->with('images')
             ->when($request->filled('keyword'), fn ($query) => $query->where('title', 'like', '%'.$request->string('keyword').'%'))
             ->when($request->filled('location'), fn ($query) => $query->where('location', $request->string('location')))
@@ -20,6 +21,7 @@ class RoomController extends Controller
             ->withQueryString();
 
         $locations = Room::query()
+            ->published()
             ->distinct()
             ->orderBy('location')
             ->pluck('location');
@@ -32,6 +34,10 @@ class RoomController extends Controller
 
     public function show(Room $room): View
     {
+        if (! $room->is_published) {
+            abort(404);
+        }
+
         $room->load('images');
 
         return view('rooms.show', compact('room'));

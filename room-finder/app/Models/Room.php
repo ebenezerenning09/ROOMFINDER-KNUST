@@ -3,17 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
-#[Fillable(['title', 'description', 'price', 'location', 'room_type', 'bedrooms', 'image', 'whatsapp'])]
+#[Fillable(['title', 'description', 'price', 'location', 'room_type', 'bedrooms', 'image', 'whatsapp', 'is_published', 'is_verified'])]
 class Room extends Model
 {
     /** Display label for price in views (not stored in the database). */
     public const PRICE_PERIOD_LABEL = 'per academic year';
 
+    public const PLACEHOLDER_IMAGE_COUNT = 14;
+
     /** @var list<string> */
-    public const ROOM_TYPES = ['1in1', '2in1', '3in1', '4in1'];
+    public const ROOM_TYPES = ['1in1', '2in1', '3in1', '4in1', 'homestay'];
 
     public static function roomTypeBadgeClass(string $roomType): string
     {
@@ -22,6 +26,7 @@ class Room extends Model
             '2in1' => 'bg-sky-100 text-sky-800',
             '3in1' => 'bg-amber-100 text-amber-800',
             '4in1' => 'bg-violet-100 text-violet-800',
+            'homestay' => 'bg-rose-100 text-rose-800',
             default => 'bg-slate-100 text-slate-800',
         };
     }
@@ -36,6 +41,44 @@ class Room extends Model
     public function images(): HasMany
     {
         return $this->hasMany(RoomImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * @param  Builder<static>  $query
+     */
+    public function scopePublished(Builder $query): void
+    {
+        self::applyBooleanWhere($query, 'is_published', true);
+    }
+
+    /**
+     * @param  Builder<static>  $query
+     */
+    public function scopeUnpublished(Builder $query): void
+    {
+        self::applyBooleanWhere($query, 'is_published', false);
+    }
+
+    /**
+     * @param  Builder<static>  $query
+     */
+    public function scopeVerified(Builder $query): void
+    {
+        self::applyBooleanWhere($query, 'is_verified', true);
+    }
+
+    /**
+     * @param  Builder<static>  $query
+     */
+    protected static function applyBooleanWhere(Builder $query, string $column, bool $value): void
+    {
+        if (DB::getDriverName() === 'pgsql') {
+            $query->whereRaw($value ? "{$column} IS TRUE" : "{$column} IS FALSE");
+
+            return;
+        }
+
+        $query->where($column, $value);
     }
 
     public function fallbackImageUrl(): string
@@ -61,7 +104,7 @@ class Room extends Model
             return '/'.$image;
         }
 
-        $index = $this->id > 0 ? (($this->id - 1) % 12) + 1 : 1;
+        $index = $this->id > 0 ? (($this->id - 1) % self::PLACEHOLDER_IMAGE_COUNT) + 1 : 1;
 
         return self::placeholderImageUrl($index);
     }
@@ -107,7 +150,7 @@ class Room extends Model
 
     public function whatsappContactMessage(): string
     {
-        return "Hi, I'm interested in your hostel listing: {$this->title} (GHS ".number_format((float) $this->price, 2).' / academic year). Is it still available?';
+        return "Hi RoomFinder, I'm interested in this listing: {$this->title} (GHS ".number_format((float) $this->price, 2).' / academic year). Is it still available?';
     }
 
     /**
@@ -118,6 +161,8 @@ class Room extends Model
         return [
             'price' => 'decimal:2',
             'bedrooms' => 'integer',
+            'is_published' => 'boolean',
+            'is_verified' => 'boolean',
         ];
     }
 }

@@ -15,7 +15,9 @@ return new class extends Migration
     public function up(): void
     {
         if (Schema::hasTable('rooms')) {
-            DB::statement("ALTER TABLE rooms ALTER COLUMN room_type SET DEFAULT '1in1'");
+            if (DB::getDriverName() === 'pgsql') {
+                DB::statement("ALTER TABLE rooms ALTER COLUMN room_type SET DEFAULT '1in1'");
+            }
 
             return;
         }
