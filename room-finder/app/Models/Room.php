@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
-#[Fillable(['title', 'description', 'price', 'location', 'room_type', 'bedrooms', 'image', 'whatsapp', 'is_published', 'is_verified'])]
+#[Fillable(['title', 'description', 'price', 'location', 'room_type', 'occupants_count', 'bedrooms', 'image', 'whatsapp', 'is_published', 'is_verified'])]
 class Room extends Model
 {
     /** Display label for price in views (not stored in the database). */
@@ -29,6 +29,23 @@ class Room extends Model
             'homestay' => 'bg-rose-100 text-rose-800',
             default => 'bg-slate-100 text-slate-800',
         };
+    }
+
+    public static function maxCapacityForType(string $roomType): int
+    {
+        return match ($roomType) {
+            '2in1' => 2,
+            '3in1' => 3,
+            '4in1' => 4,
+            default => 1,
+        };
+    }
+
+    public static function availabilityBadgeClass(bool $isFull): string
+    {
+        return $isFull
+            ? 'bg-red-100 text-red-800'
+            : 'bg-emerald-100 text-emerald-800';
     }
 
     public static function placeholderImageUrl(int $number): string
@@ -81,6 +98,38 @@ class Room extends Model
         $query->where($column, $value);
     }
 
+    public function maxCapacity(): int
+    {
+        return self::maxCapacityForType($this->room_type);
+    }
+
+    public function availableSpots(): int
+    {
+        $occupants = (int) ($this->occupants_count ?? 0);
+
+        return max(0, $this->maxCapacity() - $occupants);
+    }
+
+    public function isFull(): bool
+    {
+        return $this->availableSpots() === 0;
+    }
+
+    public function availabilityLabel(): string
+    {
+        $spots = $this->availableSpots();
+
+        if ($spots === 0) {
+            return 'Full';
+        }
+
+        if ($spots === $this->maxCapacity()) {
+            return 'Available';
+        }
+
+        return $spots === 1 ? '1 spot left' : "{$spots} spots left";
+    }
+
     public function fallbackImageUrl(): string
     {
         return '/images/hostels/default.jpg';
@@ -123,20 +172,10 @@ class Room extends Model
 
     public function whatsappUrl(?string $message = null): ?string
     {
-        if (! $this->whatsapp) {
+        $phone = self::normalizeWhatsappNumber((string) config('roomfinder.whatsapp', ''));
+
+        if ($phone === null) {
             return null;
-        }
-
-        $phone = preg_replace('/\D/', '', $this->whatsapp);
-
-        if ($phone === '') {
-            return null;
-        }
-
-        if (str_starts_with($phone, '0')) {
-            $phone = '233'.substr($phone, 1);
-        } elseif (! str_starts_with($phone, '233')) {
-            $phone = '233'.$phone;
         }
 
         $url = "https://wa.me/{$phone}";
@@ -150,7 +189,26 @@ class Room extends Model
 
     public function whatsappContactMessage(): string
     {
-        return "Hi RoomFinder, I'm interested in this listing: {$this->title} (GHS ".number_format((float) $this->price, 2).' / academic year). Is it still available?';
+        $price = number_format((float) $this->price, 2);
+
+        return "Hi RoomFinder, I'm interested in \"{$this->title}\" ({$this->room_type}, {$this->availabilityLabel()}, GHS {$price} / academic year). Is it still available?";
+    }
+
+    public static function normalizeWhatsappNumber(string $number): ?string
+    {
+        $phone = preg_replace('/\D/', '', $number);
+
+        if ($phone === '') {
+            return null;
+        }
+
+        if (str_starts_with($phone, '0')) {
+            $phone = '233'.substr($phone, 1);
+        } elseif (! str_starts_with($phone, '233')) {
+            $phone = '233'.$phone;
+        }
+
+        return $phone;
     }
 
     /**
@@ -161,6 +219,7 @@ class Room extends Model
         return [
             'price' => 'decimal:2',
             'bedrooms' => 'integer',
+            'occupants_count' => 'integer',
             'is_published' => 'boolean',
             'is_verified' => 'boolean',
         ];

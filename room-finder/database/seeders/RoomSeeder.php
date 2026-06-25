@@ -30,7 +30,6 @@ class RoomSeeder extends Seeder
                 'location' => 'Ayeduase',
                 'room_type' => '1in1',
                 'bedrooms' => 1,
-                'whatsapp' => '233501234501',
             ],
             [
                 'title' => '2in1 flat off Ayeduase Road',
@@ -38,8 +37,8 @@ class RoomSeeder extends Seeder
                 'price' => 3200.00,
                 'location' => 'Ayeduase',
                 'room_type' => '2in1',
+                'occupants_count' => 1,
                 'bedrooms' => 2,
-                'whatsapp' => '233551234502',
             ],
             [
                 'title' => 'Bright 1in1 ensuite behind Ayeduase market',
@@ -48,7 +47,6 @@ class RoomSeeder extends Seeder
                 'location' => 'Ayeduase',
                 'room_type' => '1in1',
                 'bedrooms' => 1,
-                'whatsapp' => '233241234503',
             ],
             [
                 'title' => '3in1 student house in Bomso',
@@ -56,8 +54,8 @@ class RoomSeeder extends Seeder
                 'price' => 2800.00,
                 'location' => 'Bomso',
                 'room_type' => '3in1',
+                'occupants_count' => 2,
                 'bedrooms' => 3,
-                'whatsapp' => '233501234504',
             ],
             [
                 'title' => 'Quiet 1in1 on Bomso High Street',
@@ -66,7 +64,6 @@ class RoomSeeder extends Seeder
                 'location' => 'Bomso',
                 'room_type' => '1in1',
                 'bedrooms' => 1,
-                'whatsapp' => '233551234505',
             ],
             [
                 'title' => '2in1 flat near Bomso junction',
@@ -75,7 +72,6 @@ class RoomSeeder extends Seeder
                 'location' => 'Bomso',
                 'room_type' => '2in1',
                 'bedrooms' => 2,
-                'whatsapp' => '233241234506',
             ],
             [
                 'title' => '1in1 with balcony in Kotei',
@@ -84,7 +80,6 @@ class RoomSeeder extends Seeder
                 'location' => 'Kotei',
                 'room_type' => '1in1',
                 'bedrooms' => 1,
-                'whatsapp' => '233501234507',
             ],
             [
                 'title' => 'Budget 2in1 rooms at Kotei',
@@ -93,7 +88,6 @@ class RoomSeeder extends Seeder
                 'location' => 'Kotei',
                 'room_type' => '2in1',
                 'bedrooms' => 2,
-                'whatsapp' => '233551234508',
             ],
             [
                 'title' => '4in1 hostel-style room in New Site',
@@ -101,8 +95,8 @@ class RoomSeeder extends Seeder
                 'price' => 2500.00,
                 'location' => 'New Site',
                 'room_type' => '4in1',
+                'occupants_count' => 4,
                 'bedrooms' => 4,
-                'whatsapp' => '233241234509',
             ],
             [
                 'title' => 'Premium 1in1 ensuite in New Site',
@@ -111,7 +105,6 @@ class RoomSeeder extends Seeder
                 'location' => 'New Site',
                 'room_type' => '1in1',
                 'bedrooms' => 1,
-                'whatsapp' => '233501234510',
             ],
             [
                 'title' => '2in1 flat near Boadi roundabout',
@@ -120,7 +113,6 @@ class RoomSeeder extends Seeder
                 'location' => 'Boadi',
                 'room_type' => '2in1',
                 'bedrooms' => 2,
-                'whatsapp' => '233551234511',
             ],
             [
                 'title' => 'Homestay with family in Ayeduase',
@@ -129,7 +121,6 @@ class RoomSeeder extends Seeder
                 'location' => 'Ayeduase',
                 'room_type' => 'homestay',
                 'bedrooms' => 1,
-                'whatsapp' => '233241234512',
             ],
         ];
 

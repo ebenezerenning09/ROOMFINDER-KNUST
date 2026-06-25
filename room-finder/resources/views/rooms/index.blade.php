@@ -101,6 +101,9 @@
                             <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:px-2.5 {{ \App\Models\Room::roomTypeBadgeClass($room->room_type) }}">
                                 {{ $room->room_type }}
                             </span>
+                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium sm:px-2.5 {{ \App\Models\Room::availabilityBadgeClass($room->isFull()) }}">
+                                {{ $room->availabilityLabel() }}
+                            </span>
                             <span class="truncate text-xs text-slate-500">{{ $room->location }}</span>
                         </div>
 

@@ -86,11 +86,19 @@
                     <x-input-error class="mt-2" :messages="$errors->get('room_type')" />
                 </div>
 
-                <div class="sm:col-span-2">
-                    <x-input-label for="whatsapp" value="WhatsApp number" />
-                    <x-text-input id="whatsapp" name="whatsapp" type="text" class="mt-1 block w-full" :value="old('whatsapp', $room->whatsapp)" placeholder="e.g. 0501234501" />
-                    <p class="mt-1 text-xs text-slate-500">Used for the contact button on the listing page.</p>
-                    <x-input-error class="mt-2" :messages="$errors->get('whatsapp')" />
+                <div>
+                    <x-input-label for="occupants_count" value="People already in room" />
+                    <x-text-input
+                        id="occupants_count"
+                        name="occupants_count"
+                        type="number"
+                        min="0"
+                        class="mt-1 block w-full"
+                        :value="old('occupants_count', $room->occupants_count ?? 0)"
+                        required
+                    />
+                    <p id="occupants-helper" class="mt-1 text-xs text-slate-500"></p>
+                    <x-input-error class="mt-2" :messages="$errors->get('occupants_count')" />
                 </div>
 
                 <div class="sm:col-span-2 flex flex-wrap gap-6">
@@ -172,4 +180,38 @@
             <a href="{{ route('admin.rooms.index') }}" class="text-sm font-medium text-slate-600 hover:text-slate-800">Cancel</a>
         </div>
     </form>
+
+    <script>
+        (function () {
+            const capacities = @json(collect(\App\Models\Room::ROOM_TYPES)->mapWithKeys(fn ($type) => [$type => \App\Models\Room::maxCapacityForType($type)]));
+            const roomTypeSelect = document.getElementById('room_type');
+            const occupantsInput = document.getElementById('occupants_count');
+            const helper = document.getElementById('occupants-helper');
+
+            function updateOccupancyHelper() {
+                const roomType = roomTypeSelect.value;
+                const max = capacities[roomType] ?? 1;
+                const occupants = Math.min(Math.max(parseInt(occupantsInput.value, 10) || 0, 0), max);
+
+                occupantsInput.max = max;
+                if (parseInt(occupantsInput.value, 10) > max) {
+                    occupantsInput.value = max;
+                }
+
+                const spotsLeft = max - occupants;
+
+                if (spotsLeft === 0) {
+                    helper.textContent = 'This room is full (' + occupants + ' of ' + max + ' spots taken).';
+                } else if (spotsLeft === max) {
+                    helper.textContent = 'Room is empty — ' + spotsLeft + ' spot' + (spotsLeft === 1 ? '' : 's') + ' available.';
+                } else {
+                    helper.textContent = occupants + ' of ' + max + ' spots taken — ' + spotsLeft + ' spot' + (spotsLeft === 1 ? '' : 's') + ' left.';
+                }
+            }
+
+            roomTypeSelect.addEventListener('change', updateOccupancyHelper);
+            occupantsInput.addEventListener('input', updateOccupancyHelper);
+            updateOccupancyHelper();
+        })();
+    </script>
 @endsection

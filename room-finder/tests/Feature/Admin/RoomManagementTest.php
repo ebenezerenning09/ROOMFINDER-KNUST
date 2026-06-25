@@ -26,8 +26,8 @@ class RoomManagementTest extends TestCase
             'price' => 3500,
             'location' => 'Ayeduase',
             'room_type' => '1in1',
+            'occupants_count' => 0,
             'bedrooms' => 1,
-            'whatsapp' => '0501234567',
             'is_published' => '1',
             'is_verified' => '1',
         ]);
@@ -88,8 +88,8 @@ class RoomManagementTest extends TestCase
             'price' => 2500,
             'location' => 'Kotei',
             'room_type' => '3in1',
+            'occupants_count' => 2,
             'bedrooms' => 3,
-            'whatsapp' => '0551234567',
             'is_published' => '1',
             'is_verified' => '1',
         ])->assertRedirect(route('admin.rooms.edit', $room));
@@ -98,6 +98,8 @@ class RoomManagementTest extends TestCase
 
         $this->assertSame('Updated Title', $room->title);
         $this->assertSame('Kotei', $room->location);
+        $this->assertSame(2, $room->occupants_count);
+        $this->assertSame('1 spot left', $room->availabilityLabel());
         $this->assertTrue($room->is_verified);
     }
 
@@ -139,5 +141,20 @@ class RoomManagementTest extends TestCase
             ->assertRedirect();
 
         $this->assertFalse($room->fresh()->is_published);
+    }
+
+    public function test_admin_cannot_set_occupants_above_room_capacity(): void
+    {
+        $this->actingAs($this->admin())->post(route('admin.rooms.store'), [
+            'title' => 'Invalid Occupancy Room',
+            'description' => 'Too many occupants.',
+            'price' => 3000,
+            'location' => 'Ayeduase',
+            'room_type' => '2in1',
+            'occupants_count' => 3,
+            'bedrooms' => 2,
+            'is_published' => '1',
+            'is_verified' => '0',
+        ])->assertSessionHasErrors('occupants_count');
     }
 }

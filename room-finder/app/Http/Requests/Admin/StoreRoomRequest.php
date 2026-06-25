@@ -28,8 +28,20 @@ class StoreRoomRequest extends FormRequest
             'price' => ['required', 'numeric', 'min:0'],
             'location' => ['required', 'string', 'max:255'],
             'room_type' => ['required', 'string', Rule::in(Room::ROOM_TYPES)],
+            'occupants_count' => [
+                'required',
+                'integer',
+                'min:0',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $roomType = (string) $this->input('room_type', '');
+                    $max = Room::maxCapacityForType($roomType);
+
+                    if ((int) $value > $max) {
+                        $fail("People already in room cannot exceed {$max} for a {$roomType} listing.");
+                    }
+                },
+            ],
             'bedrooms' => ['required', 'integer', 'min:1', 'max:20'],
-            'whatsapp' => ['nullable', 'string', 'max:20'],
             'is_published' => ['sometimes', 'boolean'],
             'is_verified' => ['sometimes', 'boolean'],
             'images' => ['sometimes', 'array'],
@@ -42,6 +54,7 @@ class StoreRoomRequest extends FormRequest
         $this->merge([
             'is_published' => $this->boolean('is_published'),
             'is_verified' => $this->boolean('is_verified'),
+            'occupants_count' => $this->input('occupants_count', 0),
         ]);
     }
 }

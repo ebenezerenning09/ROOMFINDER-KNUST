@@ -45,6 +45,7 @@
                             <th class="px-5 py-3 text-left font-medium text-slate-600">Title</th>
                             <th class="px-5 py-3 text-left font-medium text-slate-600">Location</th>
                             <th class="px-5 py-3 text-left font-medium text-slate-600">Price</th>
+                            <th class="px-5 py-3 text-left font-medium text-slate-600">Availability</th>
                             <th class="px-5 py-3 text-left font-medium text-slate-600">Status</th>
                             <th class="px-5 py-3 text-right font-medium text-slate-600">Actions</th>
                         </tr>
@@ -55,6 +56,11 @@
                                 <td class="px-5 py-3 font-medium text-slate-900">{{ $room->title }}</td>
                                 <td class="px-5 py-3 text-slate-600">{{ $room->location }}</td>
                                 <td class="px-5 py-3 text-slate-600">GHS {{ number_format((float) $room->price, 2) }}</td>
+                                <td class="px-5 py-3">
+                                    <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ \App\Models\Room::availabilityBadgeClass($room->isFull()) }}">
+                                        {{ $room->availabilityLabel() }}
+                                    </span>
+                                </td>
                                 <td class="px-5 py-3">
                                     <div class="flex flex-wrap gap-1.5">
                                         @if ($room->is_published)
