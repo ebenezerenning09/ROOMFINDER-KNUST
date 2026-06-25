@@ -2,7 +2,7 @@
 
 @section('content')
     @if (session('error'))
-        <div class="mb-4 rounded-lg border border-red-500/40 bg-red-950/50 px-4 py-3 text-sm text-red-300">
+        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
             {{ session('error') }}
         </div>
     @endif
@@ -11,7 +11,7 @@
         @csrf
 
         <div>
-            <label for="email" class="mb-1.5 block text-sm font-medium text-slate-300">Email</label>
+            <label for="email" class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
             <input
                 id="email"
                 type="email"
@@ -21,15 +21,15 @@
                 autofocus
                 autocomplete="username"
                 placeholder="admin@roomfinder.test"
-                class="admin-login-input block w-full rounded-lg px-3 py-2.5 text-sm"
+                class="block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             >
             @if ($errors->has('email'))
-                <p class="mt-2 text-sm text-red-400">{{ $errors->first('email') }}</p>
+                <p class="mt-2 text-sm text-red-600">{{ $errors->first('email') }}</p>
             @endif
         </div>
 
         <div>
-            <label for="password" class="mb-1.5 block text-sm font-medium text-slate-300">Password</label>
+            <label for="password" class="mb-1.5 block text-sm font-medium text-slate-700">Password</label>
             <input
                 id="password"
                 type="password"
@@ -37,10 +37,10 @@
                 required
                 autocomplete="current-password"
                 placeholder="Enter your password"
-                class="admin-login-input block w-full rounded-lg px-3 py-2.5 text-sm"
+                class="block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             >
             @if ($errors->has('password'))
-                <p class="mt-2 text-sm text-red-400">{{ $errors->first('password') }}</p>
+                <p class="mt-2 text-sm text-red-600">{{ $errors->first('password') }}</p>
             @endif
         </div>
 
@@ -50,15 +50,15 @@
                     id="remember_me"
                     type="checkbox"
                     name="remember"
-                    class="h-4 w-4 rounded border-slate-500 bg-slate-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-800"
+                    class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                 >
-                <span class="text-sm text-slate-400">Remember me</span>
+                <span class="text-sm text-slate-600">Remember me</span>
             </label>
         </div>
 
         <button
             type="submit"
-            class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-800"
+            class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
         >
             Sign in to admin
         </button>

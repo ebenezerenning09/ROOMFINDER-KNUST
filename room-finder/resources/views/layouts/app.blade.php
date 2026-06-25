@@ -25,15 +25,14 @@
 
             <div class="flex items-center gap-3 sm:gap-4">
                 @auth
-                    @unless (Auth::user()->isAdmin())
-                        <span class="hidden text-sm font-medium text-slate-600 sm:inline">{{ Auth::user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="text-sm font-medium text-slate-600 hover:text-emerald-700">
-                                Log out
-                            </button>
-                        </form>
-                    @endunless
+                    <span class="hidden text-sm font-medium text-slate-600 sm:inline">{{ Auth::user()->name }}</span>
+
+                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="text-sm font-medium text-slate-600 hover:text-emerald-700">
+                            Log out
+                        </button>
+                    </form>
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 hover:text-emerald-700">Log in</a>
                     <a href="{{ route('register') }}" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Register</a>

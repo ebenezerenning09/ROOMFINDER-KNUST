@@ -47,7 +47,7 @@
                     <option value="draft" @selected(request('status') === 'draft')>Draft</option>
                 </select>
             </div>
-            <button type="submit" class="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">Filter</button>
+            <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Filter</button>
             @if (request()->hasAny(['keyword', 'location', 'room_type', 'status']))
                 <a href="{{ route('admin.rooms.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Clear</a>
             @endif
