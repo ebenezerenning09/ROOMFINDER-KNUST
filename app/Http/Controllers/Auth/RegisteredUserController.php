@@ -20,8 +20,11 @@ class RegisteredUserController extends Controller
      */
     public function create(Request $request): View
     {
-        if ($request->filled('redirect')) {
-            $request->session()->put('url.intended', $request->query('redirect'));
+        $redirect = (string) $request->query('redirect', '');
+
+        // Only honor same-site relative paths to prevent open-redirect phishing.
+        if ($redirect !== '' && str_starts_with($redirect, '/') && ! str_starts_with($redirect, '//')) {
+            $request->session()->put('url.intended', $redirect);
         }
 
         return view('auth.register');

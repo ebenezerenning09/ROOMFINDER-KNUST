@@ -8,8 +8,30 @@
 @endsection
 
 @section('content')
+    <div x-data="{
+        loading: false,
+        buildUrl() {
+            const form = this.$refs.filterForm;
+            const qs = new URLSearchParams(new FormData(form)).toString();
+            return form.action + (qs ? ('?' + qs) : '');
+        },
+        apply() { this.goTo(this.buildUrl()); },
+        async goTo(url) {
+            this.loading = true;
+            try {
+                const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const fresh = doc.getElementById('rooms-results');
+                if (fresh) { document.getElementById('rooms-results').innerHTML = fresh.innerHTML; }
+                window.history.replaceState({}, '', url);
+            } finally {
+                this.loading = false;
+            }
+        }
+    }">
     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <form method="GET" action="{{ route('admin.rooms.index') }}" class="flex flex-1 flex-wrap items-end gap-3">
+        <form x-ref="filterForm" method="GET" action="{{ route('admin.rooms.index') }}" @submit.prevent="apply()" class="flex flex-1 flex-wrap items-end gap-3">
             <div class="min-w-[10rem] flex-1">
                 <label for="keyword" class="mb-1 block text-xs font-medium text-slate-600">Search</label>
                 <input
@@ -18,12 +40,15 @@
                     id="keyword"
                     value="{{ request('keyword') }}"
                     placeholder="Title..."
+                    autocomplete="off"
+                    @input.debounce.450ms="apply()"
+                    @search="apply()"
                     class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 >
             </div>
             <div class="min-w-[8rem]">
                 <label for="location" class="mb-1 block text-xs font-medium text-slate-600">Location</label>
-                <select name="location" id="location" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                <select name="location" id="location" @change="apply()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                     <option value="">All</option>
                     @foreach ($locations as $location)
                         <option value="{{ $location }}" @selected(request('location') === $location)>{{ $location }}</option>
@@ -32,7 +57,7 @@
             </div>
             <div class="min-w-[8rem]">
                 <label for="room_type" class="mb-1 block text-xs font-medium text-slate-600">Type</label>
-                <select name="room_type" id="room_type" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                <select name="room_type" id="room_type" @change="apply()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                     <option value="">All</option>
                     @foreach (\App\Models\Room::ROOM_TYPES as $type)
                         <option value="{{ $type }}" @selected(request('room_type') === $type)>{{ $type }}</option>
@@ -41,13 +66,16 @@
             </div>
             <div class="min-w-[8rem]">
                 <label for="status" class="mb-1 block text-xs font-medium text-slate-600">Status</label>
-                <select name="status" id="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                <select name="status" id="status" @change="apply()" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                     <option value="">All</option>
                     <option value="published" @selected(request('status') === 'published')>Published</option>
                     <option value="draft" @selected(request('status') === 'draft')>Draft</option>
                 </select>
             </div>
-            <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Filter</button>
+            {{-- Filters apply automatically; button kept as a no-JS fallback. --}}
+            <noscript>
+                <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Filter</button>
+            </noscript>
             @if (request()->hasAny(['keyword', 'location', 'room_type', 'status']))
                 <a href="{{ route('admin.rooms.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Clear</a>
             @endif
@@ -58,7 +86,12 @@
         </a>
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div
+        id="rooms-results"
+        @click="const a = $event.target.closest('a'); if (a && a.closest('nav')) { $event.preventDefault(); goTo(a.href); }"
+        :class="loading ? 'opacity-50 pointer-events-none transition' : 'transition'"
+        class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+    >
         @if ($rooms->isEmpty())
             <p class="px-5 py-12 text-center text-sm text-slate-500">No rooms match your filters.</p>
         @else
@@ -102,21 +135,43 @@
                                 </td>
                                 <td class="px-5 py-3 text-slate-600">GHS {{ number_format((float) $room->price, 2) }}</td>
                                 <td class="px-5 py-3">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <form method="POST" action="{{ route('admin.rooms.toggle-published', $room) }}" class="inline">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $room->is_published ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                                    <div class="flex flex-col gap-2">
+                                        <div class="flex items-center gap-2">
+                                            <form method="POST" action="{{ route('admin.rooms.toggle-published', $room) }}" class="inline-flex">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button
+                                                    type="submit"
+                                                    role="switch"
+                                                    aria-checked="{{ $room->is_published ? 'true' : 'false' }}"
+                                                    title="{{ $room->is_published ? 'Published — click to unpublish' : 'Draft — click to publish' }}"
+                                                    class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 {{ $room->is_published ? 'bg-emerald-500' : 'bg-slate-300' }}"
+                                                >
+                                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition {{ $room->is_published ? 'translate-x-4' : 'translate-x-0.5' }}"></span>
+                                                </button>
+                                            </form>
+                                            <span class="text-xs font-medium {{ $room->is_published ? 'text-emerald-700' : 'text-slate-500' }}">
                                                 {{ $room->is_published ? 'Published' : 'Draft' }}
-                                            </button>
-                                        </form>
-                                        <form method="POST" action="{{ route('admin.rooms.toggle-verified', $room) }}" class="inline">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $room->is_verified ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200' }}">
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <form method="POST" action="{{ route('admin.rooms.toggle-verified', $room) }}" class="inline-flex">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button
+                                                    type="submit"
+                                                    role="switch"
+                                                    aria-checked="{{ $room->is_verified ? 'true' : 'false' }}"
+                                                    title="{{ $room->is_verified ? 'Verified — click to unverify' : 'Unverified — click to verify' }}"
+                                                    class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1 {{ $room->is_verified ? 'bg-amber-500' : 'bg-slate-300' }}"
+                                                >
+                                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition {{ $room->is_verified ? 'translate-x-4' : 'translate-x-0.5' }}"></span>
+                                                </button>
+                                            </form>
+                                            <span class="text-xs font-medium {{ $room->is_verified ? 'text-amber-700' : 'text-slate-500' }}">
                                                 {{ $room->is_verified ? 'Verified' : 'Unverified' }}
-                                            </button>
-                                        </form>
+                                            </span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-5 py-3 text-right">
@@ -142,5 +197,6 @@
                 {{ $rooms->links() }}
             </div>
         @endif
+    </div>
     </div>
 @endsection
