@@ -25,14 +25,45 @@
 
             <div class="flex items-center gap-3 sm:gap-4">
                 @auth
-                    <span class="hidden text-sm font-medium text-slate-600 sm:inline">{{ Auth::user()->name }}</span>
+                    @php
+                        $authName = trim(Auth::user()->name);
+                        $nameParts = preg_split('/\s+/', $authName) ?: [];
+                        $initials = \Illuminate\Support\Str::upper(
+                            \Illuminate\Support\Str::substr($nameParts[0] ?? '', 0, 1)
+                            .(count($nameParts) > 1 ? \Illuminate\Support\Str::substr(end($nameParts), 0, 1) : '')
+                        );
+                    @endphp
+                    <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+                        <button
+                            type="button"
+                            @click="open = ! open"
+                            :aria-expanded="open"
+                            aria-haspopup="true"
+                            class="inline-flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                            title="{{ $authName }}"
+                            aria-label="{{ $authName }}"
+                        >{{ $initials !== '' ? $initials : '?' }}</button>
 
-                    <form method="POST" action="{{ route('logout') }}" class="inline">
-                        @csrf
-                        <button type="submit" class="text-sm font-medium text-slate-600 hover:text-emerald-700">
-                            Log out
-                        </button>
-                    </form>
+                        <div
+                            x-show="open"
+                            x-cloak
+                            @click.outside="open = false"
+                            x-transition.origin.top.right
+                            class="absolute right-0 z-50 mt-2 w-56 origin-top-right overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
+                        >
+                            <div class="border-b border-slate-100 px-4 py-3">
+                                <p class="truncate text-sm font-semibold text-slate-900">{{ $authName }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ Auth::user()->email }}</p>
+                            </div>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50">
+                                    Log out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 hover:text-emerald-700">Log in</a>
                     <a href="{{ route('register') }}" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Register</a>
