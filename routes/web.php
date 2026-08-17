@@ -17,7 +17,7 @@ Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
 Route::get('/rooms/{room:slug}', [RoomController::class, 'show'])->name('rooms.show');
 
 Route::get('/sitemap.xml', function () {
-    $rooms = \App\Models\Room::query()->published()->latest('updated_at')->get(['slug', 'updated_at']);
+    $rooms = \App\Models\Room::query()->published()->latest('updated_at')->get();
 
     return response()
         ->view('sitemap', ['rooms' => $rooms])

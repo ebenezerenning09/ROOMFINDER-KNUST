@@ -30,6 +30,22 @@ class Room extends Model
     }
 
     /**
+     * Slug is the route key ({room:slug}), which Laravel reads via this
+     * accessor. If a legacy row has no slug yet, generate and persist one on
+     * the fly so URL generation never fails.
+     */
+    public function getSlugAttribute(?string $value): ?string
+    {
+        if (blank($value) && $this->exists && ! empty($this->attributes['id'])) {
+            $value = self::generateUniqueSlug((string) ($this->attributes['title'] ?? ''), (int) $this->attributes['id']);
+            $this->attributes['slug'] = $value;
+            $this->saveQuietly();
+        }
+
+        return $value;
+    }
+
+    /**
      * Build a URL-safe slug from a title, guaranteed unique across rooms.
      */
     public static function generateUniqueSlug(string $title, ?int $ignoreId = null): string
