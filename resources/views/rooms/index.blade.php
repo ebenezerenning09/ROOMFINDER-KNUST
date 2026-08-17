@@ -1,6 +1,24 @@
 @extends('layouts.app')
 
 @section('title', 'Browse Rooms')
+@section('meta_description', 'Browse verified student hostel rooms around KNUST, Kumasi. Filter by location, room type and price. 1in1, 2in1, 3in1, 4in1 and homestay listings priced per academic year.')
+
+@push('head')
+    @php
+        $ldList = [
+            '@context' => 'https://schema.org',
+            '@type' => 'ItemList',
+            'name' => 'Student hostels near KNUST, Kumasi',
+            'itemListElement' => $rooms->map(fn ($room, $i) => [
+                '@type' => 'ListItem',
+                'position' => $i + 1,
+                'url' => route('rooms.show', $room),
+                'name' => $room->title,
+            ])->values()->all(),
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($ldList, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+@endpush
 
 @section('content')
     <div class="mb-6 sm:mb-8">

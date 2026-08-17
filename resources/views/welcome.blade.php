@@ -3,10 +3,56 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    @php
+        $seoDescription = 'RoomFinder helps KNUST students find verified hostel rooms around Kumasi. Browse 1in1, 2in1, 3in1, 4in1 and homestay listings priced per academic year. Pay the 10% agent fee only after a successful placement.';
+        $seoImage = asset('images/knust-campus-hero.jpg');
+        $seoCanonical = url()->current();
+    @endphp
+
     <title>RoomFinder: Student Housing in Kumasi</title>
+    <meta name="description" content="{{ $seoDescription }}">
+    <link rel="canonical" href="{{ $seoCanonical }}">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#059669">
+
+    <meta property="og:site_name" content="RoomFinder">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="RoomFinder: Student Housing in Kumasi">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $seoCanonical }}">
+    <meta property="og:image" content="{{ $seoImage }}">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="RoomFinder: Student Housing in Kumasi">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
+
     <link rel="icon" href="{{ asset('favicon.png') }}?v=4" type="image/png">
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @php
+        $ldSite = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => 'RoomFinder',
+            'url' => url('/'),
+            'description' => $seoDescription,
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => url('/rooms').'?keyword={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => 'RoomFinder',
+                'email' => 'hello@elitealfaventures.com',
+                'logo' => asset('favicon.png'),
+                'areaServed' => 'KNUST, Kumasi, Ghana',
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($ldSite, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 </head>
 <body style="margin:0;">
     {{-- One photo only, real img tag, no CSS background tiling --}}

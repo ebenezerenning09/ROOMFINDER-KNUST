@@ -4,17 +4,44 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>
-        @hasSection('title')
-            @yield('title'): RoomFinder
-        @else
-            RoomFinder: Student Housing in Kumasi
-        @endif
-    </title>
+
+    @php
+        $siteName = 'RoomFinder';
+        $seoPageTitle = trim($__env->yieldContent('title'));
+        $seoTitle = $seoPageTitle !== '' ? $seoPageTitle.': '.$siteName : $siteName.': Student Housing in Kumasi';
+        $seoDescription = trim($__env->yieldContent('meta_description'))
+            ?: 'Find verified student hostel rooms near KNUST, Kumasi. Browse 1in1, 2in1, 3in1, 4in1 and homestay listings priced per academic year, and contact the RoomFinder admin.';
+        $seoImage = trim($__env->yieldContent('og_image')) ?: asset('images/knust-campus-hero.jpg');
+        $seoType = trim($__env->yieldContent('og_type')) ?: 'website';
+        $seoCanonical = url()->current();
+    @endphp
+
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDescription }}">
+    <link rel="canonical" href="{{ $seoCanonical }}">
+    <meta name="robots" content="@yield('robots', 'index, follow')">
+    <meta name="theme-color" content="#059669">
+
+    {{-- Open Graph --}}
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:type" content="{{ $seoType }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $seoCanonical }}">
+    <meta property="og:image" content="{{ $seoImage }}">
+    <meta property="og:locale" content="en_US">
+
+    {{-- Twitter --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
+
     <link rel="icon" href="{{ asset('favicon.png') }}?v=4" type="image/png">
     <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}?v=4">
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('head')
 </head>
 <body class="flex min-h-screen flex-col bg-slate-50 text-slate-900 antialiased">
     <nav class="border-b border-slate-200 bg-white shadow-sm">

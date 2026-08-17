@@ -16,6 +16,22 @@ Route::get('/favicon.ico', fn () => response()->file(public_path('favicon.png'),
 Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
 Route::get('/rooms/{room:slug}', [RoomController::class, 'show'])->name('rooms.show');
 
+Route::get('/sitemap.xml', function () {
+    $rooms = \App\Models\Room::query()->published()->latest('updated_at')->get(['slug', 'updated_at']);
+
+    return response()
+        ->view('sitemap', ['rooms' => $rooms])
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
+Route::get('/llms.txt', function () {
+    $rooms = \App\Models\Room::query()->published()->latest()->get();
+
+    return response()
+        ->view('llms', ['rooms' => $rooms])
+        ->header('Content-Type', 'text/plain; charset=utf-8');
+})->name('llms');
+
 Route::get('/dashboard', function () {
     if (auth()->user()?->isAdmin()) {
         return redirect()->route('admin.dashboard');

@@ -1,6 +1,32 @@
 @extends('layouts.app')
 
 @section('title', $room->title)
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($room->description), 155))
+@section('og_image', $room->imageUrl())
+@section('og_type', 'product')
+
+@push('head')
+    @php
+        $ldRoom = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $room->title,
+            'description' => \Illuminate\Support\Str::limit(strip_tags($room->description), 300),
+            'image' => array_map(fn ($url) => url($url), $room->imageUrls()),
+            'category' => 'Student hostel accommodation near KNUST',
+            'brand' => ['@type' => 'Brand', 'name' => 'RoomFinder'],
+            'offers' => [
+                '@type' => 'Offer',
+                'price' => number_format((float) $room->price, 2, '.', ''),
+                'priceCurrency' => 'GHS',
+                'availability' => $room->isFull() ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+                'url' => url()->current(),
+                'areaServed' => $room->location.', Kumasi',
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($ldRoom, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+@endpush
 
 @section('content')
     <div class="mb-5 sm:mb-6">
